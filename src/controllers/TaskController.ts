@@ -24,4 +24,22 @@ export class TaskController{
             res.status(500).json({error: 'There was an error'})
         }
     }
+
+    static getProjectTaskById = async(req: Request, res: Response) => {
+        try {
+            const { taskId } = req.params
+            const task = await Task.findById(taskId)
+            if(!task){
+                const error = new Error('Task not found in the project')
+                return res.status(404).json({error: error.message})
+            }
+            if(task.project.toString() !== req.project._id.toString()){
+                const error = new Error('The task doesnt exist in this project')
+                return res.status(400).json({error: error.message})
+            }
+            res.json(task)
+        } catch (error) {
+            res.status(500).json({error: 'There was an error'})
+        }
+    }
 }
