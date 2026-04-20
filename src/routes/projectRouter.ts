@@ -4,6 +4,7 @@ import { ProjectController } from "../controllers/ProjectController";
 import { handleInputErrors } from "../middleware/validation";
 import { TaskController } from "../controllers/TaskController";
 import { validateProjectExist } from "../middleware/project";
+import { taskExists } from "../middleware/task";
 
 
 const router = Router()
@@ -52,6 +53,8 @@ router.get('/:projectId/tasks',
     TaskController.getProjectTask
 )
 
+router.param('taskId',taskExists)
+
 router.get('/:projectId/tasks/:taskId',
     param('taskId').isMongoId().withMessage('Invalid Id'),
     handleInputErrors,
@@ -70,6 +73,15 @@ router.delete('/:projectId/tasks/:taskId',
     param('taskId').isMongoId().withMessage('Invalid Id'),
     handleInputErrors,
     TaskController.deleteTask
+)
+
+router.patch('/:projectId/tasks/:taskId/status',
+    param('taskId').isMongoId().withMessage('Invalid Id'),
+    body('status')
+        .notEmpty().withMessage('The status is required')
+        .isIn(['pending', 'on_hold', 'in_pogress', 'under_review', 'complete']).withMessage('Invalid status'),
+    handleInputErrors,
+    TaskController.updateTaskStatus
 )
 
 export default router
