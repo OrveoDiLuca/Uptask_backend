@@ -10,7 +10,6 @@ declare global { //Declaration Merging
     }
 }
 
-//Se utiliza un middleware para ver si existe un proyecto o no para centralizar la logica y también para separar la fucionalidad.
 
 export async function taskExists(req: Request, res: Response, next: NextFunction){
     //revisa si existe o no un proyecto.
@@ -25,5 +24,17 @@ export async function taskExists(req: Request, res: Response, next: NextFunction
         next()
     } catch (error) {
         res.status(500).json({error: 'There was an error'})
+    }
+}
+
+export async function taskBelongsToProject(req: Request, res: Response, next: NextFunction){
+    try {
+        if(req.task.project.toString() !== req.project._id.toString()){
+            const error = new Error('The task doesnt exist in this project')
+            return res.status(400).json({error: error.message})
+        }
+        next()
+    } catch (error) {
+        res.status(500).json({error: 'There was an error'}) 
     }
 }
