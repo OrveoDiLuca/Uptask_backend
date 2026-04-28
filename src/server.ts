@@ -6,7 +6,6 @@ import { connectDB } from "./config/db"
 import projectRoutes from './routes/projectRouter'
 
 dotenv.config()
-
 connectDB()
 
 const app = express()
