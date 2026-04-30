@@ -1,4 +1,5 @@
 import type {Request, Response, NextFunction} from 'express'
+import { isValidObjectId } from 'mongoose'
 import Task, { TaskType } from '../models/Task'
 
 
@@ -15,6 +16,10 @@ export async function taskExists(req: Request, res: Response, next: NextFunction
     //revisa si existe o no un proyecto.
     try {
         const { taskId } = req.params
+        if (!isValidObjectId(taskId)) {
+            res.status(404).json({ error: 'Task not found' })
+            return
+        }
         const task = await Task.findById(taskId)
         if (!task) {
             res.status(404).json({ error: 'Task not found' })
