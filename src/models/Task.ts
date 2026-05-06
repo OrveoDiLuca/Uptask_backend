@@ -3,7 +3,7 @@ import mongoose, {Schema, Document, Types} from 'mongoose'
 const taskStatus = {
     PENDING: 'pending',
     ON_HOLD: 'on_hold', 
-    IN_PROGRESS: 'in_pogress',
+    IN_PROGRESS: 'in_progress',
     UNDER_REVIEW: 'under_review', 
     COMPLETE: 'complete'
 } as const //No se pueden modificar esos valores 

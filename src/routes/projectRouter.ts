@@ -80,7 +80,7 @@ router.patch('/:projectId/tasks/:taskId/status',
     param('taskId').isMongoId().withMessage('Invalid Id'),
     body('status')
         .notEmpty().withMessage('The status is required')
-        .isIn(['pending', 'on_hold', 'in_pogress', 'under_review', 'complete']).withMessage('Invalid status'),
+        .isIn(['pending', 'on_hold', 'in_progress', 'under_review', 'complete']).withMessage('Invalid status'),
     handleInputErrors,
     TaskController.updateTaskStatus
 )
