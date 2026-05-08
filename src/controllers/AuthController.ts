@@ -1,6 +1,9 @@
 import type { Request, Response } from "express"
 import User from "../models/User"
 import { hashPassword } from "../utils/auth"
+import Token from "../models/Token"
+import { generateToken } from "../utils/token"
+import { AuthEmail } from "../emails/AuthEmails"
 
 export class AuthController {
     static createAccount = async(req: Request, res: Response) => {
@@ -18,8 +21,42 @@ export class AuthController {
             const user = new User(req.body)
             //Hasheando el password del usuario. 
             user.password = await hashPassword(password)
-            await user.save()
+
+            //Generate Token. 
+            const token = new Token()
+            token.token = generateToken()
+            token.user = user._id
+
+            AuthEmail.sendConfirmationEmail({
+                email: user.email,
+                name: user.name, 
+                token: token.token
+            })
+
+            await Promise.allSettled([user.save(), token.save()])
             res.send('User created succesfully, check your email for verify your user.')
+        } catch (error) {
+            res.status(500).json({error: 'There was an error'})
+        }
+    }
+
+
+    static confirmAccount = async(req: Request, res: Response) => {
+        try {
+            const { token } = req.body
+            //Searching if the token exist in the database. 
+            const tokenExist = await Token.findOne({token})
+
+            if(!tokenExist){
+                const error = new Error('Token not valid')
+                return res.status(401).json({error: error.message})
+            }
+
+            const user = await User.findById(tokenExist.user)
+            user.confirmed = true
+
+            await Promise.allSettled([user.save(), tokenExist.deleteOne()])
+            res.send('Account confirmed')
         } catch (error) {
             res.status(500).json({error: 'There was an error'})
         }
