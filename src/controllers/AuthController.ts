@@ -27,8 +27,11 @@ export class AuthController {
             token.token = generateToken()
             token.user = user._id
 
-
-
+            AuthEmail.sendConfirmationEmail({
+                email: user.email,
+                name: user.name,
+                token: token.token
+            })
             await Promise.allSettled([user.save(), token.save()])
             res.send('User created succesfully, check your email for verify your user.')
         } catch (error) {
@@ -72,7 +75,7 @@ export class AuthController {
                 token.token = generateToken()
                 await token.save()
 
-                AuthEmail.sendConfirmationEmail({
+                await AuthEmail.sendConfirmationEmail({
                     email: user.email,
                     name: user.name,
                     token: token.token
@@ -91,6 +94,39 @@ export class AuthController {
 
             res.send('Login succesfully')
 
+        } catch (error) {
+            res.status(500).json({ error: 'There was an error' })
+        }
+    }
+
+    static RequestConfirmationCode = async (req: Request, res: Response) => {
+        try {
+            const { email } = req.body
+            //check if exist email. 
+            const user = await User.findOne({ email })
+
+            if (!user) {
+                const error = new Error('The user does not exist')
+                return res.status(404).json({ error: error.message })
+            }
+
+            if(user.confirmed){
+                const error = new Error('The user has been confirmed already')
+                return res.status(403).json({ error: error.message })
+            }
+
+            //Generate Token. 
+            const token = new Token()
+            token.token = generateToken()
+            token.user = user._id
+
+            AuthEmail.sendConfirmationEmail({
+                email: user.email,
+                name: user.name,
+                token: token.token
+            })
+            await Promise.allSettled([user.save(), token.save()])
+            res.send('A new token has been sent to your email')
         } catch (error) {
             res.status(500).json({ error: 'There was an error' })
         }
