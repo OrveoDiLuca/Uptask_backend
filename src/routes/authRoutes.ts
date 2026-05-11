@@ -38,4 +38,10 @@ router.post('/request-code',
     AuthController.RequestConfirmationCode
 )
 
+router.post('/forgot-password',
+    body('email').isEmail().withMessage('Invalid email').notEmpty().withMessage('The email is required'),
+    handleInputErrors, 
+    AuthController.ForgotPassword 
+)
+
 export default router

@@ -131,4 +131,32 @@ export class AuthController {
             res.status(500).json({ error: 'There was an error' })
         }
     }
+
+    static ForgotPassword = async (req: Request, res: Response) => {
+        try {
+            const { email } = req.body
+            //check if exist email. 
+            const user = await User.findOne({ email })
+
+            if (!user) {
+                const error = new Error('The user does not exist')
+                return res.status(404).json({ error: error.message })
+            }
+
+            //Generate Token. 
+            const token = new Token()
+            token.token = generateToken()
+            token.user = user._id
+            await token.save()
+
+            AuthEmail.sendPasswordResetToken({
+                email: user.email,
+                name: user.name,
+                token: token.token
+            })
+            res.send('Check your email for reset password')
+        } catch (error) {
+            res.status(500).json({ error: 'There was an error' })
+        }
+    }
 }
