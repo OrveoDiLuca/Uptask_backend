@@ -87,7 +87,7 @@ export class AuthController {
 
             const isPasswordCorrect = await checkPassword(password, user.password)
 
-            if(!isPasswordCorrect){
+            if (!isPasswordCorrect) {
                 const error = new Error('Password incorrect')
                 return res.status(401).json({ error: error.message })
             }
@@ -110,7 +110,7 @@ export class AuthController {
                 return res.status(404).json({ error: error.message })
             }
 
-            if(user.confirmed){
+            if (user.confirmed) {
                 const error = new Error('The user has been confirmed already')
                 return res.status(403).json({ error: error.message })
             }
@@ -155,6 +155,46 @@ export class AuthController {
                 token: token.token
             })
             res.send('Check your email for reset password')
+        } catch (error) {
+            res.status(500).json({ error: 'There was an error' })
+        }
+    }
+
+    static confirmToken = async (req: Request, res: Response) => {
+        try {
+            const { token } = req.body
+            //Searching if the token exist in the database. 
+            const tokenExist = await Token.findOne({ token })
+
+            if (!tokenExist) {
+                const error = new Error('Token not valid')
+                return res.status(404).json({ error: error.message })
+            }
+
+            res.send('The token is valid, define your new password')
+        } catch (error) {
+            res.status(500).json({ error: 'There was an error' })
+        }
+    }
+
+    static updatePasswordWithToken = async (req: Request, res: Response) => {
+        try {
+            const { token } = req.params
+            const {password} = req.body
+            //Searching if the token exist in the database. 
+            const tokenExist = await Token.findOne({ token })
+
+            if (!tokenExist) {
+                const error = new Error('Token not valid')
+                return res.status(404).json({ error: error.message })
+            }
+
+            const user = await User.findById(tokenExist.user)
+            user.password = await hashPassword(password)
+
+            await Promise.allSettled([user.save(), tokenExist.deleteOne()])
+
+            res.send('Your password has been updated succesfully')
         } catch (error) {
             res.status(500).json({ error: 'There was an error' })
         }
