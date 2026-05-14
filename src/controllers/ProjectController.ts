@@ -4,8 +4,11 @@ import Project from '../models/Project'
 export class ProjectController {
 
     static createProject = async (req : Request, res: Response) => {
+        const project = new Project(req.body)
+        project.manager = req.user._id
+
         try {
-            await Project.create(req.body) //Lo guarda en la base de datos
+            await project.save() //Lo guarda en la base de datos
             res.send('Project created succesfully')
         } catch (error) {
             console.log(error)

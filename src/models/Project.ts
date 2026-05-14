@@ -1,5 +1,6 @@
 import mongoose, {Schema, Document, PopulatedDoc, Types} from 'mongoose'
 import { TaskType } from './Task'
+import { IUser } from './User'
 
 //Este model es para typescript
 export type ProjectType = Document & {
@@ -7,6 +8,7 @@ export type ProjectType = Document & {
     client_name: string 
     description: string
     tasks: PopulatedDoc<TaskType & Document>[] //Son multiples tareas que puede tener un proyecto. 
+    manager: PopulatedDoc<IUser & Document>
 }
 
 //Este model es para mongoose, ya que estamos definiendo las tablas que va a tener ese modelo.
@@ -32,6 +34,10 @@ const ProjectSchema : Schema = new Schema({
         ref: 'Task'
         }
     ],
+    manager: {
+        type: Types.ObjectId,
+        ref: 'User'
+    }
 }, {timestamps: true})
 
 const Project = mongoose.model<ProjectType>('Project', ProjectSchema)
