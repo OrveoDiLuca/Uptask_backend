@@ -25,13 +25,12 @@ export const aunthenticate = async (req: Request, res: Response, next: NextFunct
             const user = await User.findById(decoded.id).select('_id name email')
             if(user){
                 req.user = user
+                next()
             }else{
-                res.status(500).json({error: 'Token no validate'})
+                res.status(401).json({error: 'Token no validate'})
             }
         }
-        
     } catch (error) {
-        res.status(500).json({error: 'Token no validate'})
+        res.status(401).json({error: 'Token no validate'})
     }
-    next()
 }
