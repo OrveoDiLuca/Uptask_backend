@@ -9,6 +9,7 @@ export type ProjectType = Document & {
     description: string
     tasks: PopulatedDoc<TaskType & Document>[] //Son multiples tareas que puede tener un proyecto. 
     manager: PopulatedDoc<IUser & Document>
+    team: PopulatedDoc<IUser & Document>[]
 }
 
 //Este model es para mongoose, ya que estamos definiendo las tablas que va a tener ese modelo.
@@ -37,7 +38,13 @@ const ProjectSchema : Schema = new Schema({
     manager: {
         type: Types.ObjectId,
         ref: 'User'
-    }
+    },
+    team: [
+        {
+        type: Types.ObjectId,
+        ref: 'User'
+        }
+    ],
 }, {timestamps: true})
 
 const Project = mongoose.model<ProjectType>('Project', ProjectSchema)
