@@ -30,12 +30,12 @@ export class TeamMemberController {
                 return res.status(404).json({error: error.message})
             }
 
-            req.project.team.push(user._id)
             if(req.project.team.some(team => team.toString() === user.id.toString())){
                 const error = new Error('This user is already in the team!')
                 return res.status(409).json({error: error.message})
             }
 
+            req.project.team.push(user._id)
             await req.project.save()
             res.send('User added succesfully')
         } catch (error) {
@@ -44,15 +44,15 @@ export class TeamMemberController {
     }
 
     static deleteUserById = async (req: Request, res: Response) => {
-        const {id} = req.body
+        const {userId} = req.params
         try {
 
-            if(!req.project.team.some(team => team.toString() === id)){
+            if(!req.project.team.some(team => team.toString() === userId)){
                 const error = new Error('This user not exist in the project')
                 return res.status(409).json({error: error.message})
             }
 
-            req.project.team = req.project.team.filter(team => team.toString() !== id)
+            req.project.team = req.project.team.filter(team => team.toString() !== userId)
             await req.project.save()
             res.send('User deleted succesfully')
         } catch (error) {
