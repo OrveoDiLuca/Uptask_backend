@@ -43,3 +43,15 @@ export async function taskBelongsToProject(req: Request, res: Response, next: Ne
         res.status(500).json({error: 'There was an error'}) 
     }
 }
+
+export async function hasAuthorization(req: Request, res: Response, next: NextFunction){
+    try {
+        if(req.user._id.toString() !== req.project.manager.toString()){
+            const error = new Error('This action is not valid for your user.')
+            return res.status(400).json({error: error.message})
+        }
+        next()
+    } catch (error) {
+        res.status(500).json({error: 'There was an error'}) 
+    }
+}
