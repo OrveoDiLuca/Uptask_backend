@@ -48,6 +48,11 @@ export class TaskController{
     static updateTaskStatus = async (req: Request, res: Response) => {
         try {
             req.task.status = req.body.status
+            if(req.task.status === 'pending'){
+                req.task.completedBy = null
+            }else{
+                req.task.completedBy = req.user._id
+            }
             await req.task.save()
             res.send('Task status updated succesfully')
         } catch (error) {
