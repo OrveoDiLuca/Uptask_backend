@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose'
+import { types } from 'node:util'
 
 const taskStatus = {
     PENDING: 'pending',
@@ -19,6 +20,7 @@ export type TaskType = Document & {
         user: Types.ObjectId,
         status: taskStatus
     }[]
+    notes: Types.ObjectId[]
 }
 
 export const TaskSchema: Schema = new Schema({
@@ -53,6 +55,12 @@ export const TaskSchema: Schema = new Schema({
                 enum: Object.values(taskStatus),
                 default: taskStatus.PENDING
             }
+        }
+    ],
+    notes: [
+        {
+            type: Types.ObjectId,
+            ref: 'Note'
         }
     ]
 }, { timestamps: true })
