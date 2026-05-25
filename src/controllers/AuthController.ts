@@ -202,7 +202,44 @@ export class AuthController {
         }
     }
 
-     static user = async (req: Request, res: Response) => {
-         return res.json(req.user)
+    static user = async (req: Request, res: Response) => {
+        return res.json(req.user)
+    }
+
+    static updateProfile = async (req: Request, res: Response) => {
+        const {name, email} = req.body
+
+        req.user.name = name
+        req.user.email = email
+
+        const userExist = await User.findOne({email})//Buscando que el email este en la base de datos
+        if(userExist && userExist._id.toString() !== req.user._id.toString()){
+            const error = new Error('This email is already in use')
+            return res.status(409).json({error: error.message})
+        }
+
+        try {
+            await req.user.save()
+            res.send('Profile updated succesfully')
+        } catch (error) {
+            res.status(500).send('There was an error')
+        }
+    }
+
+    static updatePassword = async (req: Request, res: Response) => {
+        const {current_password, password} = req.body
+        const user = await User.findById(req.user._id)
+        const isPasswordCorrect = await checkPassword(current_password, user.password)
+        if(!isPasswordCorrect){
+            const error = new Error('The current password is incorrect')
+            return res.status(401).json({error: error.message})
+        }
+        try {
+            user.password = await hashPassword(password)
+            await user.save()
+            res.send('The password has been updated succesfully') 
+        } catch (error) {
+            res.status(500).send('There was an error')
+        }
     }
 }
