@@ -1,6 +1,7 @@
 import mongoose, {Schema, Document, PopulatedDoc, Types} from 'mongoose'
-import { TaskType } from './Task'
+import Task, { TaskType } from './Task'
 import { IUser } from './User'
+import Note from './Note'
 
 //Este model es para typescript
 export type ProjectType = Document & {
@@ -46,6 +47,17 @@ const ProjectSchema : Schema = new Schema({
         }
     ],
 }, {timestamps: true})
+
+//Middleware 
+ProjectSchema.pre('deleteOne', {document: true}, async function() {
+    const projectId = this._id
+    if(!projectId) return 
+    const tasks = await Task.find({project: projectId})
+    for (const task of tasks) {
+        await Note.deleteOne({task: task._id})
+    }
+    await Task.deleteMany({project: projectId})
+})
 
 const Project = mongoose.model<ProjectType>('Project', ProjectSchema)
 export default Project

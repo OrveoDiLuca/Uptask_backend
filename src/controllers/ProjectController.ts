@@ -50,25 +50,12 @@ export class ProjectController {
     }
 
     static putProject = async (req: Request, res: Response) => {
-        const { id } = req.params
         try {
-            const project = await Project.findById(id)
-
-            if (!project) {
-                res.status(404).json({ error: 'Project not found' })
-                return
-            }
-
-            if(project.manager.toString() !== req.user._id.toString()){
-                res.status(404).json({ error: 'Only the manager can update this project.'})
-                return
-            }
-
-            project.client_name = req.body.client_name
-            project.project_name = req.body.project_name
-            project.description = req.body.description
+            req.project.client_name = req.body.client_name
+            req.project.project_name = req.body.project_name
+            req.project.description = req.body.description
             
-            await project.save()
+            await req.project.save()
             res.send('Project updated succesfully')
         } catch (error) {
             console.log(error)
@@ -76,20 +63,8 @@ export class ProjectController {
     }
 
     static deleteProject = async (req: Request, res: Response) => {
-        const { id } = req.params
         try {
-            const project = await Project.findById(id)
-            if (!project) {
-                res.status(404).json({ error: 'Project not found' })
-                return
-            }
-
-            if(project.manager.toString() !== req.user._id.toString()){
-                res.status(404).json({ error: 'Only the manager can delete this project.'})
-                return
-            }
-            
-            await project.deleteOne()
+            await req.project.deleteOne()
             res.send('Project deleted succesfully')
         } catch (error) {
             console.log(error)
